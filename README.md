@@ -1,2 +1,3 @@
 # Movies 4k App Created
-testing for git
+.../// Rules 
+-> Use /flutter pub add/ cmnd before starting working on projects
