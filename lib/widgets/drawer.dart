@@ -12,9 +12,4 @@ class _DrawerState extends State<Drawermenu> {
   Widget build(BuildContext context) {
     return Drawer(backgroundColor: Theme.of(context).scaffoldBackgroundColor);
   }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

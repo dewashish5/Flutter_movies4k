@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:movies/pages/homepagelistview.dart';
-import 'package:movies/widgets/drawer.dart'; // ✅ import your drawer widget
+import 'package:movies/widgets/drawer.dart';
 
 class Mainapp extends StatefulWidget {
   const Mainapp({super.key});
@@ -11,15 +11,10 @@ class Mainapp extends StatefulWidget {
 }
 
 class _MainappState extends State<Mainapp> {
-  int _navcurrentIndex = 0;
+  int _navCurrentIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _navcurrentIndex = index;
-    });
-  }
-
+  /// Pages for Bottom Navigation
   late final List<Widget> _pages = [
     Homepagelistview(
       isloggedin: true,
@@ -32,15 +27,23 @@ class _MainappState extends State<Mainapp> {
     const Center(child: Text('Profile Page')),
   ];
 
+  /// Handle bottom navigation taps
+  void _onItemTapped(int index) {
+    if (!mounted) return;
+    setState(() {
+      _navCurrentIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    log("Current Index: $_navcurrentIndex");
-    return Scaffold(
-      drawerScrimColor: const Color(0x00000000),
+    log("Current Index: $_navCurrentIndex");
 
+    return Scaffold(
       key: _scaffoldKey,
       drawer: const Drawermenu(),
-      body: _pages[_navcurrentIndex],
+      drawerScrimColor: Colors.transparent,
+      body: _pages[_navCurrentIndex],
 
       bottomNavigationBar: Container(
         width: double.infinity,
@@ -79,13 +82,14 @@ class _MainappState extends State<Mainapp> {
     );
   }
 
+  /// Custom Bottom Navigation Item
   Widget buildNavItem({
     required int index,
     required double width,
     required String icon,
     required String label,
   }) {
-    bool isSelected = _navcurrentIndex == index;
+    bool isSelected = _navCurrentIndex == index;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
@@ -96,7 +100,7 @@ class _MainappState extends State<Mainapp> {
       decoration: BoxDecoration(
         color: isSelected
             ? const Color(0xff131A22).withValues(alpha: 0.85)
-            : const Color(0x00000000),
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -104,15 +108,13 @@ class _MainappState extends State<Mainapp> {
           IconButton(
             enableFeedback: false,
             padding: const EdgeInsets.all(10),
-            onPressed: () {
-              _onItemTapped(index);
-            },
+            onPressed: () => _onItemTapped(index),
             icon: Image.asset(
               icon,
               color: isSelected
                   ? const Color(0xff12CDD9)
                   : Theme.of(context).brightness == Brightness.light
-                  ? const Color(0xFFFFFFFF)
+                  ? Colors.white
                   : const Color.fromARGB(125, 255, 255, 255),
             ),
           ),
@@ -126,7 +128,10 @@ class _MainappState extends State<Mainapp> {
                   label,
                   overflow: TextOverflow.fade,
                   softWrap: false,
-                  style: const TextStyle(color: Color(0xff12CDD9)),
+                  style: const TextStyle(
+                    color: Color(0xff12CDD9),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),

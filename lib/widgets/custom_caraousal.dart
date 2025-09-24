@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-
 import 'package:movies/Api/traktapi.dart';
 
 class CustomCaraousal extends StatefulWidget {
@@ -17,8 +16,14 @@ class _CustomCaraousalState extends State<CustomCaraousal> {
 
   @override
   void initState() {
-    _traktapi.fetchTrendingMoviesFromTrakt().then((value) => setState(() {}));
     super.initState();
+    _loadTrendingMovies();
+  }
+
+  Future<void> _loadTrendingMovies() async {
+    await _traktapi.fetchTrendingMoviesFromTrakt();
+    if (!mounted) return; // ✅ prevent setState after dispose
+    setState(() {});
   }
 
   @override
@@ -42,8 +47,8 @@ class _CustomCaraousalState extends State<CustomCaraousal> {
                 scrollDirection: Axis.horizontal,
                 pauseAutoPlayOnTouch: true,
                 pauseAutoPlayOnManualNavigate: true,
-
                 onPageChanged: (index, reason) {
+                  if (!mounted) return; // ✅ safeguard
                   setState(() {
                     _currentindex = index;
                   });
@@ -89,7 +94,6 @@ class _CustomCaraousalState extends State<CustomCaraousal> {
                             const Icon(Icons.error),
                       ),
                     ),
-
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
@@ -119,14 +123,11 @@ class _CustomCaraousalState extends State<CustomCaraousal> {
                                 TextStyle style = Theme.of(
                                   context,
                                 ).textTheme.titleMedium!;
-
                                 double fontSize = style.fontSize!;
-                                if (title.length > 25) {
-                                  fontSize -= 2;
-                                }
-                                if (title.length > 40) {
-                                  fontSize -= 2;
-                                }
+
+                                if (title.length > 25) fontSize -= 2;
+                                if (title.length > 40) fontSize -= 2;
+
                                 return Text(
                                   title,
                                   style: style.copyWith(fontSize: fontSize),
@@ -149,7 +150,6 @@ class _CustomCaraousalState extends State<CustomCaraousal> {
                 );
               }).toList(),
             ),
-
             const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -159,22 +159,18 @@ class _CustomCaraousalState extends State<CustomCaraousal> {
                 return AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    height: 10,
-                    width: _currentindex == e.key ? 28 : 10,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      color: _currentindex == e.key
-                          ? Theme.of(context).brightness == Brightness.dark
-                                ? const Color(0xff4B8787)
-                                : const Color.fromARGB(255, 230, 231, 233)
-                          : Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFF9E9E9E).withValues(alpha: 0.3)
-                          : const Color(0xFF9E9E9E).withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+                  height: 10,
+                  width: _currentindex == e.key ? 28 : 10,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    color: _currentindex == e.key
+                        ? (Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xff4B8787)
+                              : const Color.fromARGB(255, 230, 231, 233))
+                        : (Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFF9E9E9E).withValues(alpha: 0.3)
+                              : const Color(0xFF9E9E9E).withValues(alpha: 0.4)),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                 );
               }).toList(),

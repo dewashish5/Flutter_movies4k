@@ -94,9 +94,4 @@ class _SearchbarState extends State<Searchbar> {
       ),
     );
   }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

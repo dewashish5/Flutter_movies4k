@@ -12,9 +12,4 @@ class _WishlistState extends State<Wishlist> {
   Widget build(BuildContext context) {
     return const Scaffold(body: Center(child: Text("Wishlist")));
   }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

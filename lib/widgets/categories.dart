@@ -15,11 +15,18 @@ class _CategoriesState extends State<Categories> {
 
   @override
   void initState() {
-    _traktapi.fetchTrendingMoviesFromTrakt().then((value) => setState(() {}));
-    _traktapi
-        .fetchMoviesaspergenreFromTrakt(genres[_selectedIndex])
-        .then((value) => setState(() {}));
     super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    await _traktapi.fetchTrendingMoviesFromTrakt();
+    if (!mounted) return;
+    setState(() {});
+
+    await _traktapi.fetchMoviesaspergenreFromTrakt(genres[_selectedIndex]);
+    if (!mounted) return;
+    setState(() {});
   }
 
   final List<String> genres = [
@@ -76,14 +83,15 @@ class _CategoriesState extends State<Categories> {
                         await _traktapi.fetchTrendingMoviesFromTrakt();
                       } else {
                         await _traktapi.fetchMoviesaspergenreFromTrakt(
-                          genres[index]
-                              .toLowerCase(), // ✅ Trakt expects lowercase slugs
+                          genres[index].toLowerCase(),
                         );
                       }
 
-                      setState(() {}); // Rebuild UI after data fetch
+                      if (!mounted) return;
+                      setState(() {});
                     }
                   },
+
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 25),
                     margin: const EdgeInsets.symmetric(
@@ -195,14 +203,14 @@ class _CategoriesState extends State<Categories> {
                                     imageUrl: genres[_selectedIndex] == "All"
                                         ? "https://${_traktapi.allmoviesDataTrakt[index]['images']['poster'][0]}"
                                         : "https://${_traktapi.moviesforgenre[index]['images']['poster'][0]}",
-                                    placeholder: (context, url) => Center(
-                                      child: CircularProgressIndicator(
-                                        color: const Color(
-                                          0xff12CDD9,
-                                        ).withValues(alpha: 0.5),
-                                      ),
-                                    ),
 
+                                    // placeholder: (context, url) => Center(
+                                    //   child: CircularProgressIndicator(
+                                    //     color: const Color(
+                                    //       0xff12CDD9,
+                                    //     ).withValues(alpha: 0.5),
+                                    //   ),
+                                    // ),
                                     fit: BoxFit.cover,
                                   ),
                                 ),

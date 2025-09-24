@@ -106,8 +106,6 @@ class _HomepagelistviewState extends State<Homepagelistview> {
           const SizedBox(child: CustomCaraousal()),
           const SizedBox(height: 30),
           const SizedBox(child: Categories()),
-          const SizedBox(child: Categories()),
-          const SizedBox(child: CustomCaraousal()),
         ],
       ),
     );
