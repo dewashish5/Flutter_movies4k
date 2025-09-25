@@ -1,4 +1,5 @@
 import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -17,7 +18,6 @@ class DescriptionPage extends StatefulWidget {
       castimage,
       trailer,
       castexpertise;
-
   const DescriptionPage({
     super.key,
     this.trailer = "",
@@ -48,7 +48,7 @@ class _DescriptionPageState extends State<DescriptionPage> {
     super.initState();
     final videoId = YoutubePlayer.convertUrlToId(widget.trailer);
     _controller = YoutubePlayerController(
-      initialVideoId: videoId!,
+      initialVideoId: videoId ?? "",
       flags: const YoutubePlayerFlags(
         autoPlay: false,
         forceHD: true,
@@ -58,26 +58,9 @@ class _DescriptionPageState extends State<DescriptionPage> {
     );
   }
 
-  void toggleTrailer() {
-    if (!mounted) return;
-
-    setState(() {
-      isPlaying = !isPlaying;
-    });
-
-    if (mounted) {
-      if (isPlaying) {
-        _controller.play();
-      } else {
-        _controller.pause();
-      }
-    }
-    log("Trailer playing: $isPlaying");
-  }
-
   @override
   void dispose() {
-    _controller.dispose();
+    _controller.dispose(); // ✅ release controller
     super.dispose();
   }
 
@@ -87,346 +70,430 @@ class _DescriptionPageState extends State<DescriptionPage> {
       body: SafeArea(
         child: ListView(
           children: [
-            // Backdrop + YouTube player + AppBar
-            Stack(
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.fastEaseInToSlowEaseOut,
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        blurRadius: 2,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                  child: AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: Stack(
-                      children: [
-                        // Backdrop image
-                        AnimatedOpacity(
-                          duration: const Duration(milliseconds: 400),
-                          opacity: isPlaying ? 0 : 1,
-                          child: CachedNetworkImage(
-                            imageUrl: widget.backdropimage,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                          ),
-                        ),
-
-                        // Gradient overlay
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.black.withValues(alpha: 0.35),
-                                Colors.transparent,
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        // YouTube player
-                        if (isPlaying)
-                          YoutubePlayer(
-                            controller: _controller,
-                            showVideoProgressIndicator: true,
-                            bottomActions: const [
-                              CurrentPosition(),
-                              ProgressBar(
-                                isExpanded: true,
-                                colors: ProgressBarColors(
-                                  playedColor: Colors.white,
-                                  handleColor: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // AppBar
-                AppBar(
-                  leading: IconButton(
-                    enableFeedback: false,
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  actions: [
-                    IconButton(
-                      onPressed: () {},
-                      icon: SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: Image.asset(
-                          "Assets/heart.png",
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-
-            // Poster + Movie Info
-            MovieInfoSection(
-              widget: widget,
-              isPlaying: isPlaying,
-              onWatchTrailer: toggleTrailer,
-            ),
-
-            // Description Section
-            DescriptionSection(widget: widget),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Poster + buttons + rating + genre
-class MovieInfoSection extends StatelessWidget {
-  final DescriptionPage widget;
-  final bool isPlaying;
-  final VoidCallback onWatchTrailer;
-
-  const MovieInfoSection({
-    super.key,
-    required this.widget,
-    required this.isPlaying,
-    required this.onWatchTrailer,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(10),
-      height: 175,
-      child: Row(
-        children: [
-          // Poster
-          Container(
-            height: 175,
-            width: 114,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              image: DecorationImage(
-                image: CachedNetworkImageProvider(widget.posterimage),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-
-          const SizedBox(width: 10),
-
-          // Info Column
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "${widget.title} (${widget.year})",
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-
-                // Buttons
-                Row(
+                Stack(
                   children: [
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xffFF8700),
-                      ),
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.play_arrow_outlined,
-                        color: Colors.white,
-                      ),
-                      label: const Text(
-                        "Play",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(width: 5),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(
-                          0xff131A22,
-                        ).withValues(alpha: 0.9),
-                      ),
-                      onPressed: onWatchTrailer,
-                      icon: const Icon(
-                        Icons.play_arrow_outlined,
-                        color: Colors.white,
-                      ),
-                      label: const Text(
-                        "Watch Trailer",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
-
-                // Rating + Actions
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Rating
-                    Container(
-                      margin: const EdgeInsets.only(left: 0),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 5,
-                      ),
+                    AnimatedContainer(
                       decoration: BoxDecoration(
-                        color: const Color(0xff252836).withValues(alpha: 0.72),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Image.asset(
-                            "Assets/star.png",
-                            height: 14,
-                            width: 14,
-                            color: const Color(0xFFFF6E40),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            double.tryParse(
-                                  widget.rating,
-                                )?.toStringAsFixed(1) ??
-                                "0.0",
-                            style: const TextStyle(
-                              color: Color(0xFFFF6E40),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            blurRadius: 2,
+                            spreadRadius: 1,
                           ),
                         ],
                       ),
-                    ),
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.fastEaseInToSlowEaseOut,
+                      child: AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: Stack(
+                          children: [
+                            AnimatedOpacity(
+                              duration: const Duration(milliseconds: 400),
+                              opacity: isPlaying ? 0 : 1,
+                              child: CachedNetworkImage(
+                                imageUrl: widget.backdropimage,
+                                fadeInCurve: Curves.easeInOut,
+                                fadeInDuration: const Duration(
+                                  milliseconds: 200,
+                                ),
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                              ),
+                            ),
 
-                    // Download & Share
-                    Row(
-                      children: [
-                        CircleIconButton(
-                          iconPath: "Assets/download.png",
-                          backgroundColor: const Color(
-                            0xff131A22,
-                          ).withValues(alpha: 0.9),
-                          iconColor: const Color(0xffFF8700),
-                          onPressed: () {},
+                            // Gradient overlay
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.black.withValues(alpha: 0.35),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            // YouTube Player
+                            isPlaying
+                                ? YoutubePlayer(
+                                    controller: _controller,
+                                    showVideoProgressIndicator: true,
+                                    bottomActions: const [
+                                      CurrentPosition(),
+                                      ProgressBar(
+                                        isExpanded: true,
+                                        colors: ProgressBarColors(
+                                          playedColor: Colors.white,
+                                          handleColor: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : const SizedBox.shrink(),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        CircleIconButton(
-                          iconWidget: const Icon(
-                            Icons.share_outlined,
-                            color: Colors.white,
+                      ),
+                    ),
+                    AppBar(
+                      leading: IconButton(
+                        enableFeedback: false,
+                        icon: const Icon(
+                          Icons.arrow_back_ios,
+                          color: Colors.white,
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      backgroundColor: Colors.transparent,
+                      centerTitle: true,
+                      titleSpacing: 50,
+                      elevation: 0,
+                      actions: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.fastEaseInToSlowEaseOut,
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 20),
+                            child: IconButton(
+                              onPressed: () {},
+                              icon: const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: Image(
+                                  image: AssetImage("Assets/heart.png"),
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           ),
-                          backgroundColor: const Color(
-                            0xff131A22,
-                          ).withValues(alpha: 0.9),
-                          onPressed: () {},
                         ),
                       ],
                     ),
                   ],
                 ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 175,
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 175,
+                        width: 114,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          image: DecorationImage(
+                            image: CachedNetworkImageProvider(
+                              widget.posterimage,
+                            ),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.only(top: 20, left: 20),
+                              child: Text(
+                                "${widget.title} (${widget.year})",
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Container(
+                              margin: const EdgeInsets.only(left: 20, top: 10),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  ElevatedButton(
+                                    style: ButtonStyle(
+                                      splashFactory: NoSplash.splashFactory,
+                                      backgroundColor:
+                                          const WidgetStatePropertyAll(
+                                            Color(0xffFF8700),
+                                          ),
+                                    ),
+                                    onPressed: () {},
+                                    child: const Row(
+                                      children: [
+                                        Icon(
+                                          size: 25,
+                                          Icons.play_arrow_outlined,
+                                          color: Colors.white,
+                                        ),
+                                        Text(
+                                          "Play",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  ElevatedButton(
+                                    style: ButtonStyle(
+                                      backgroundColor: WidgetStatePropertyAll(
+                                        const Color(
+                                          0xff131A22,
+                                        ).withValues(alpha: 0.9),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      if (!mounted) return;
+                                      setState(() {
+                                        isPlaying = !isPlaying;
+                                      });
+                                      if (mounted) {
+                                        isPlaying
+                                            ? _controller.play()
+                                            : _controller.pause();
+                                      }
+                                      log(isPlaying.toString());
+                                    },
+                                    child: const Row(
+                                      children: [
+                                        Icon(
+                                          size: 25,
+                                          Icons.play_arrow_outlined,
+                                          color: Colors.white,
+                                        ),
+                                        Text(
+                                          "Watch Trailer",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              width: 260,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    margin: const EdgeInsets.only(left: 20),
+                                    child: Container(
+                                      margin: const EdgeInsets.all(5),
+                                      width: 50,
+                                      height: 34,
+                                      decoration: BoxDecoration(
+                                        color: const Color(
+                                          0xff252836,
+                                        ).withValues(alpha: 0.72),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Image.asset(
+                                            "Assets/star.png",
+                                            height: 14,
+                                            width: 14,
+                                            color: const Color(0xFFFF6E40),
+                                          ),
+                                          Text(
+                                            double.tryParse(
+                                                  widget.rating,
+                                                )?.toStringAsFixed(1) ??
+                                                "0.0",
+                                            style: const TextStyle(
+                                              color: Color(0xFFFF6E40),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 128,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        Container(
+                                          height: 40,
+                                          width: 60,
+                                          decoration: BoxDecoration(
+                                            color: const Color(
+                                              0xff131A22,
+                                            ).withValues(alpha: 0.9),
+                                            borderRadius: BorderRadius.circular(
+                                              100,
+                                            ),
+                                          ),
+                                          child: IconButton(
+                                            onPressed: () {},
+                                            icon: SizedBox(
+                                              child: Image.asset(
+                                                "Assets/download.png",
+                                                height: 15,
+                                                width: 15,
+                                                color: const Color(0xffFF8700),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Container(
+                                          height: 40,
+                                          width: 60,
+                                          decoration: BoxDecoration(
+                                            color: const Color(
+                                              0xff131A22,
+                                            ).withValues(alpha: 0.9),
+                                            borderRadius: BorderRadius.circular(
+                                              100,
+                                            ),
+                                          ),
+                                          child: IconButton(
+                                            iconSize: 18,
+                                            onPressed: () {},
+                                            icon: const Icon(
+                                              Icons.share_outlined,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 30,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_month_outlined,
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? Colors.white
+                            : Colors.grey.shade600,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        widget.releaseDate,
+                        style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                          color:
+                              Theme.of(context).brightness == Brightness.light
+                              ? Colors.white
+                              : Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Container(
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? Colors.white
+                            : Colors.grey.shade600,
+                        height: 18,
+                        width: .5,
+                      ),
+                      const SizedBox(width: 5),
+                      Icon(
+                        Icons.timer_outlined,
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? Colors.white
+                            : Colors.grey.shade600,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        "${widget.time} min",
+                        style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                          color:
+                              Theme.of(context).brightness == Brightness.light
+                              ? Colors.white
+                              : Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Container(
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? Colors.white
+                            : Colors.grey.shade600,
+                        height: 18,
+                        width: .5,
+                      ),
+                      const SizedBox(width: 5),
+                      Icon(
+                        Icons.movie,
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? Colors.white
+                            : Colors.grey.shade600,
+                      ),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: Text(
+                          widget.genre,
+                          style: Theme.of(context).textTheme.titleSmall!
+                              .copyWith(
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.light
+                                    ? Colors.white
+                                    : Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12,
+                              ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 30),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Description",
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      widget.overview,
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Description text
-class DescriptionSection extends StatelessWidget {
-  final DescriptionPage widget;
-  const DescriptionSection({super.key, required this.widget});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Description",
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            widget.overview,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Circular IconButton used for download/share
-class CircleIconButton extends StatelessWidget {
-  final String? iconPath;
-  final Widget? iconWidget;
-  final Color backgroundColor;
-  final Color? iconColor;
-  final VoidCallback onPressed;
-
-  const CircleIconButton({
-    super.key,
-    this.iconPath,
-    this.iconWidget,
-    required this.backgroundColor,
-    this.iconColor,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 40,
-      width: 60,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(100),
-      ),
-      child: IconButton(
-        icon:
-            iconWidget ??
-            (iconPath != null
-                ? Image.asset(
-                    iconPath!,
-                    color: iconColor,
-                    height: 15,
-                    width: 15,
-                  )
-                : const SizedBox()),
-        onPressed: onPressed,
+          ],
+        ),
       ),
     );
   }
