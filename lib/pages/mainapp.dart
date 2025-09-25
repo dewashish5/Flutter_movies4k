@@ -1,6 +1,8 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:movies/pages/downloades.dart';
 import 'package:movies/pages/homepagelistview.dart';
+import 'package:movies/pages/searchpage.dart';
 import 'package:movies/widgets/drawer.dart';
 
 class Mainapp extends StatefulWidget {
@@ -22,8 +24,8 @@ class _MainappState extends State<Mainapp> {
         _scaffoldKey.currentState?.openDrawer();
       },
     ),
-    const Center(child: Text('Search Page')),
-    const Center(child: Text('Downloads Page')),
+    const Searchpage(),
+    Downloadpage(isempy: true),
     const Center(child: Text('Profile Page')),
   ];
 

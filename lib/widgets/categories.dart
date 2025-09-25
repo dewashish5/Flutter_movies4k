@@ -262,13 +262,13 @@ class _CategoriesState extends State<Categories> {
                                           ? "https://${_traktapi.allmoviesDataTrakt[index]['images']['poster'][0]}"
                                           : "https://${_traktapi.moviesforgenre[index]['images']['poster'][0]}",
 
-                                      // placeholder: (context, url) => Center(
-                                      //   child: CircularProgressIndicator(
-                                      //     color: const Color(
-                                      //       0xff12CDD9,
-                                      //     ).withValues(alpha: 0.5),
-                                      //   ),
-                                      // ),
+                                      placeholder: (context, url) => Center(
+                                        child: CircularProgressIndicator(
+                                          color: const Color(
+                                            0xff12CDD9,
+                                          ).withValues(alpha: 0.5),
+                                        ),
+                                      ),
                                       fit: BoxFit.cover,
                                     ),
                                   ),
