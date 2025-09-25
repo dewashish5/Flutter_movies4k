@@ -32,7 +32,7 @@ class TraktApi {
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         trendingMoviesDataTrakt.addAll(data);
-        // log("✅ Trending Movies from Trakt: $trendingMoviesDataTrakt");
+        log("✅ Trending Movies from Trakt: $trendingMoviesDataTrakt");
       } else {
         log("❌ Failed to fetch movies. Status Code: ${response.statusCode}");
         log("Response: ${response.body}");

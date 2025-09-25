@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:movies/Api/traktapi.dart';
+import 'package:movies/pages/description_page.dart';
 
 class CustomCaraousal extends StatefulWidget {
   const CustomCaraousal({super.key});
@@ -22,7 +23,7 @@ class _CustomCaraousalState extends State<CustomCaraousal> {
 
   Future<void> _loadTrendingMovies() async {
     await _traktapi.fetchTrendingMoviesFromTrakt();
-    if (!mounted) return; // ✅ prevent setState after dispose
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -58,95 +59,121 @@ class _CustomCaraousalState extends State<CustomCaraousal> {
                 final String imageUrl =
                     "https://${e['movie']['images']['fanart'][0]}";
 
-                return Stack(
-                  children: [
-                    Material(
-                      elevation: 5,
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      shadowColor: Theme.of(context).scaffoldBackgroundColor,
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return DescriptionPage(
+                            title: e['movie']['title'] ?? "No title",
+                            backdropimage: imageUrl,
+                            overview: e['movie']['overview'] ?? "No overview",
+                            rating: (e['movie']['rating']).toString(),
+                            year: e['movie']['year'].toString(),
+                            genre: (e['movie']['genres'] as List<dynamic>).join(
+                              ", ",
+                            ),
+                            posterimage:
+                                "https://${e['movie']['images']['poster'][0]}",
+                            time: e['movie']['runtime'].toString(),
+                            releaseDate: e['movie']['released'].toString(),
+                            trailer: e['movie']['trailer'].toString(),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  child: Stack(
+                    children: [
+                      Material(
+                        elevation: 5,
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        shadowColor: Theme.of(context).scaffoldBackgroundColor,
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                const Color(0xFF101011).withValues(alpha: 0.2),
+                                const Color(0xff101011),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.blueGrey,
+                            ),
+                          ),
+                          errorWidget: (context, url, error) =>
+                              const Icon(Icons.error),
+                        ),
+                      ),
+                      Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              const Color(0xFF101011).withValues(alpha: 0.2),
-                              const Color(0xff101011),
+                              const Color(0x00000000),
+                              const Color(0xFF000000).withValues(alpha: 0.6),
                             ],
                           ),
                         ),
                       ),
-                    ),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: CachedNetworkImage(
-                        imageUrl: imageUrl,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => const Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.blueGrey,
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 500),
+                        top: MediaQuery.of(context).size.height * 0.12,
+                        left: MediaQuery.of(context).size.width * 0.03,
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.7,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              LayoutBuilder(
+                                builder: (context, constraints) {
+                                  String title = e['movie']['title'];
+                                  TextStyle style = Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium!;
+                                  double fontSize = style.fontSize!;
+
+                                  if (title.length > 25) fontSize -= 2;
+                                  if (title.length > 40) fontSize -= 2;
+
+                                  return Text(
+                                    title,
+                                    style: style.copyWith(fontSize: fontSize),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: true,
+                                  );
+                                },
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                e['movie']['year'].toString(),
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                            ],
                           ),
                         ),
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.error),
                       ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            const Color(0x00000000),
-                            const Color(0xFF000000).withValues(alpha: 0.6),
-                          ],
-                        ),
-                      ),
-                    ),
-                    AnimatedPositioned(
-                      duration: const Duration(milliseconds: 500),
-                      top: MediaQuery.of(context).size.height * 0.12,
-                      left: MediaQuery.of(context).size.width * 0.03,
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.7,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            LayoutBuilder(
-                              builder: (context, constraints) {
-                                String title = e['movie']['title'];
-                                TextStyle style = Theme.of(
-                                  context,
-                                ).textTheme.titleMedium!;
-                                double fontSize = style.fontSize!;
-
-                                if (title.length > 25) fontSize -= 2;
-                                if (title.length > 40) fontSize -= 2;
-
-                                return Text(
-                                  title,
-                                  style: style.copyWith(fontSize: fontSize),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  softWrap: true,
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              e['movie']['year'].toString(),
-                              style: Theme.of(context).textTheme.titleSmall,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               }).toList(),
             ),

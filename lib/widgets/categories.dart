@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:movies/Api/traktapi.dart';
+import 'package:movies/pages/description_page.dart';
 import 'package:movies/widgets/allcategories.dart';
 
 class Categories extends StatefulWidget {
@@ -176,181 +177,245 @@ class _CategoriesState extends State<Categories> {
                     padding: const EdgeInsets.all(5),
                     shrinkWrap: true,
                     scrollDirection: Axis.horizontal,
-                    itemBuilder: (context, index) => Container(
-                      width: 135,
-                      margin: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xff131A22).withValues(alpha: 0.5),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(10),
+                    itemBuilder: (context, index) => GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DescriptionPage(
+                              overview: genres[_selectedIndex] == "All"
+                                  ? _traktapi
+                                        .allmoviesDataTrakt[index]['overview']
+                                  : _traktapi.moviesforgenre[index]['overview'],
+                              backdropimage: genres[_selectedIndex] == "All"
+                                  ? "https://${_traktapi.allmoviesDataTrakt[index]['images']['fanart'][0]}"
+                                  : "https://${_traktapi.moviesforgenre[index]['images']['fanart'][0]}",
+                              title: genres[_selectedIndex] == "All"
+                                  ? _traktapi.allmoviesDataTrakt[index]['title']
+                                  : _traktapi.moviesforgenre[index]['title'],
+                              year: genres[_selectedIndex] == "All"
+                                  ? _traktapi.allmoviesDataTrakt[index]['year']
+                                        .toString()
+                                  : _traktapi.moviesforgenre[index]['year']
+                                        .toString(),
+                              rating: genres[_selectedIndex] == "All"
+                                  ? _traktapi
+                                        .allmoviesDataTrakt[index]['rating']
+                                        .toString()
+                                  : _traktapi.moviesforgenre[index]['rating']
+                                        .toString(),
+                              genre: genres[_selectedIndex] == "All"
+                                  ? (_traktapi.allmoviesDataTrakt[index]['genres']
+                                            as List)
+                                        .join(", ")
+                                  : (_traktapi.moviesforgenre[index]['genres']
+                                            as List)
+                                        .join(", "),
+                              releaseDate: genres[_selectedIndex] == "All"
+                                  ? _traktapi
+                                        .allmoviesDataTrakt[index]['released']
+                                        .toString()
+                                  : _traktapi.moviesforgenre[index]['released']
+                                        .toString(),
+                              time: genres[_selectedIndex] == "All"
+                                  ? _traktapi
+                                        .allmoviesDataTrakt[index]['runtime']
+                                        .toString()
+                                  : _traktapi.moviesforgenre[index]['runtime']
+                                        .toString(),
+                              posterimage: genres[_selectedIndex] == "All"
+                                  ? "https://${_traktapi.allmoviesDataTrakt[index]['images']['poster'][0]}"
+                                  : "https://${_traktapi.moviesforgenre[index]['images']['poster'][0]}",
+                              trailer: genres[_selectedIndex] == "All"
+                                  ? _traktapi
+                                        .allmoviesDataTrakt[index]['trailer']
+                                  : _traktapi.moviesforgenre[index]['trailer'],
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 135,
+                        margin: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xff131A22).withValues(alpha: 0.5),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(10),
+                          ),
                         ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
 
-                        children: [
-                          Stack(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(10),
-                                  ),
-                                  child: CachedNetworkImage(
-                                    imageUrl: genres[_selectedIndex] == "All"
-                                        ? "https://${_traktapi.allmoviesDataTrakt[index]['images']['poster'][0]}"
-                                        : "https://${_traktapi.moviesforgenre[index]['images']['poster'][0]}",
-
-                                    // placeholder: (context, url) => Center(
-                                    //   child: CircularProgressIndicator(
-                                    //     color: const Color(
-                                    //       0xff12CDD9,
-                                    //     ).withValues(alpha: 0.5),
-                                    //   ),
-                                    // ),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              Positioned.fill(
-                                child: Container(
-                                  color: const Color(
-                                    0xFF000000,
-                                  ).withValues(alpha: 0.15),
-                                ),
-                              ),
-
-                              Positioned(
-                                left: 80,
-                                top: 10,
-                                right: 10,
-                                child: Container(
-                                  margin: const EdgeInsets.all(2),
-                                  width: 40,
-                                  height: 24,
+                          children: [
+                            Stack(
+                              children: [
+                                Container(
                                   decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(10),
+                                    ),
+                                    child: CachedNetworkImage(
+                                      imageUrl: genres[_selectedIndex] == "All"
+                                          ? "https://${_traktapi.allmoviesDataTrakt[index]['images']['poster'][0]}"
+                                          : "https://${_traktapi.moviesforgenre[index]['images']['poster'][0]}",
+
+                                      // placeholder: (context, url) => Center(
+                                      //   child: CircularProgressIndicator(
+                                      //     color: const Color(
+                                      //       0xff12CDD9,
+                                      //     ).withValues(alpha: 0.5),
+                                      //   ),
+                                      // ),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                Positioned.fill(
+                                  child: Container(
                                     color: const Color(
-                                      0xff252836,
-                                    ).withValues(alpha: 0.72),
-                                    borderRadius: BorderRadius.circular(8),
+                                      0xFF000000,
+                                    ).withValues(alpha: 0.15),
+                                  ),
+                                ),
+
+                                Positioned(
+                                  left: 80,
+                                  top: 10,
+                                  right: 10,
+                                  child: Container(
+                                    margin: const EdgeInsets.all(2),
+                                    width: 40,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      color: const Color(
+                                        0xff252836,
+                                      ).withValues(alpha: 0.72),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Image.asset(
+                                          "Assets/star.png",
+                                          height: 14,
+                                          width: 14,
+                                          color: const Color(0xFFFF6E40),
+                                        ),
+                                        Text(
+                                          genres[_selectedIndex] == "All"
+                                              ? (_traktapi.allmoviesDataTrakt[index]['rating']
+                                                        as double)
+                                                    .toStringAsFixed(1)
+                                              : (_traktapi.moviesforgenre[index]['rating']
+                                                        as double)
+                                                    .toStringAsFixed(1),
+                                          style: const TextStyle(
+                                            color: Color(0xFFFF6E40),
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.only(
+                                    left: 5,
+                                    top: 5,
+                                  ),
+                                  child: Text(
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    genres[_selectedIndex] == "All"
+                                        ? "${_traktapi.allmoviesDataTrakt[index]['title']}"
+                                        : "${_traktapi.moviesforgenre[index]['title']}",
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontFamily: "monserrat",
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  margin: const EdgeInsets.only(
+                                    left: 6,
+                                    top: 3,
                                   ),
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      Image.asset(
-                                        "Assets/star.png",
-                                        height: 14,
-                                        width: 14,
-                                        color: const Color(0xFFFF6E40),
-                                      ),
                                       Text(
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
                                         genres[_selectedIndex] == "All"
-                                            ? (_traktapi.allmoviesDataTrakt[index]['rating']
-                                                      as double)
-                                                  .toStringAsFixed(1)
-                                            : (_traktapi.moviesforgenre[index]['rating']
-                                                      as double)
-                                                  .toStringAsFixed(1),
+                                            ? "${_traktapi.allmoviesDataTrakt[index]['year']} "
+                                            : "${_traktapi.moviesforgenre[index]['year']}",
                                         style: const TextStyle(
-                                          color: Color(0xFFFF6E40),
-                                          fontSize: 12,
+                                          fontSize: 10,
+                                          fontFamily: "monserrat",
                                           fontWeight: FontWeight.w500,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        genres[_selectedIndex] == "All"
+                                            ? (_traktapi.allmoviesDataTrakt[index]['genres']
+                                                      as List)
+                                                  .firstWhere(
+                                                    (g) =>
+                                                        g
+                                                            .toString()
+                                                            .toLowerCase() ==
+                                                        genres[_selectedIndex]
+                                                            .toLowerCase(),
+                                                    orElse: () =>
+                                                        (_traktapi
+                                                                .allmoviesDataTrakt[index]['genres']
+                                                            as List)[0],
+                                                  )
+                                            : (_traktapi.moviesforgenre[index]['genres']
+                                                      as List)
+                                                  .firstWhere(
+                                                    (g) =>
+                                                        g
+                                                            .toString()
+                                                            .toLowerCase() ==
+                                                        genres[_selectedIndex]
+                                                            .toLowerCase(),
+                                                    orElse: () =>
+                                                        (_traktapi
+                                                                .moviesforgenre[index]['genres']
+                                                            as List)[0],
+                                                  ),
+
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          fontFamily: "monserrat",
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.grey,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                margin: const EdgeInsets.only(left: 5, top: 5),
-                                child: Text(
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                  genres[_selectedIndex] == "All"
-                                      ? "${_traktapi.allmoviesDataTrakt[index]['title']}"
-                                      : "${_traktapi.moviesforgenre[index]['title']}",
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontFamily: "monserrat",
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                margin: const EdgeInsets.only(left: 6, top: 3),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                      genres[_selectedIndex] == "All"
-                                          ? "${_traktapi.allmoviesDataTrakt[index]['year']} "
-                                          : "${_traktapi.moviesforgenre[index]['year']}",
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        fontFamily: "monserrat",
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                      genres[_selectedIndex] == "All"
-                                          ? (_traktapi.allmoviesDataTrakt[index]['genres']
-                                                    as List)
-                                                .firstWhere(
-                                                  (g) =>
-                                                      g
-                                                          .toString()
-                                                          .toLowerCase() ==
-                                                      genres[_selectedIndex]
-                                                          .toLowerCase(),
-                                                  orElse: () =>
-                                                      (_traktapi
-                                                              .allmoviesDataTrakt[index]['genres']
-                                                          as List)[0],
-                                                )
-                                          : (_traktapi.moviesforgenre[index]['genres']
-                                                    as List)
-                                                .firstWhere(
-                                                  (g) =>
-                                                      g
-                                                          .toString()
-                                                          .toLowerCase() ==
-                                                      genres[_selectedIndex]
-                                                          .toLowerCase(),
-                                                  orElse: () =>
-                                                      (_traktapi
-                                                              .moviesforgenre[index]['genres']
-                                                          as List)[0],
-                                                ),
-
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        fontFamily: "monserrat",
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     itemCount: genres[_selectedIndex] == "All"
